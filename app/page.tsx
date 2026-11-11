@@ -14,12 +14,14 @@ const animer = async (
   keyframes: Keyframe[],
   durationMS: number,
   garderLesValeursFinales: boolean = false,
+  iterations: number = 1,
 ) => {
   const element = document.getElementById(elementId);
 
   const animation = element?.animate(keyframes, {
     duration: durationMS,
     fill: garderLesValeursFinales ? "forwards" : "none",
+    iterations,
   });
   await animation?.finished;
 };
@@ -93,17 +95,25 @@ const FLIP: Keyframe[] = [
 // TODO: Écrire les keyframes comme demandé dans l'énoncé
 
 // TODO: FADE_IN : de transparent à visible
-
+const FADE_IN: Keyframe[] = [{ opacity: 0 }, { opacity: 1 }];
 // TODO: FADE_OUT : devient transparent
-
+const FADE_OUT: Keyframe[] = [{ opacity: 1 }, { opacity: 0 }];
 // TODO: PULSE : le slime grossit puis revient à sa taille normale (3 valeurs)
-
+const PULSE: Keyframe[] = [
+  { transform: "scale(1)" },
+  { transform: "scale(4.5)", offset: 0.1 },
+  { transform: "scale(1)" },
+];
 // TODO: ROTATE_CENTER : une rotation complète autour du centre
-
+const ROTATE_CENTER: Keyframe[] = [{ transform: "rotate(360deg)" }];
 // TODO: ROTATE_HOR : une rotation complète sur l'axe horizontal
-
+const ROTATE_HOR: Keyframe[] = [{ transform: "rotateX(360deg)" }];
 // FIN keyframes
-
+const ROTATE_TRIPLE: Keyframe[] = [
+  { transform: "rotate(0deg) rotateX(0deg)" },
+  { transform: "rotate(720deg) rotateX(0deg)", offset: 0.66 },
+  { transform: "rotate(720deg) rotateX(360deg)" },
+];
 export default function Home() {
   // détermine quels boutons sont affichés
   const [slimeIsPresent, setSlimeIsPresent] = useState(false);
@@ -121,31 +131,39 @@ export default function Home() {
 
     // TODO: death
     // Les deux animations jouent en même temps (pas de await entre les deux)
-    
+    animer("slimeyId", FADE_OUT, DEATH_DURATION_MS, true);
+    animer("slimeyId", SHAKE_X, SHAKE_DURATION_MS);
   };
 
   const attack = async () => {
     // TODO: attack
     // await : on attend la fin de l'élan avant de jouer l'attaque
-    
+    await animer("slimeyId", JELLO, PREATTACK_DURATION_MS);
+    await animer("slimeyId", PULSE, ATTACK_DURATION_MS);
   };
 
   const bounceShakeFlip = async () => {
     // TODO: bounceShakeFlip
-    
+    await animer("slimeyId", BOUNCE, BOUNCE_DURATION_MS);
+    await animer("slimeyId", SHAKE_X, SHAKE_DURATION_MS);
+    await animer("slimeyId", FLIP, FLIP_DURATION_MS);
   };
 
   const infiniteTripleSpin = async () => {
     // TODO: infiniteTripleSpin
     // Boucle infinie : 2 rotations au centre, puis 1 rotation horizontale
     // On n'utilisera pas l'option de boucler l'animation, car on veut 2 rotations au centre puis 1 rotation horizontale, et non pas 3 rotations au centre
-    
-    // TODO: Optionnel: Un petit défi, vous pourriez faire une seule animation qui combine les 3 rotations et utilisé l'option de boucle
+    while (true) {
+      await animer("slimeyId", ROTATE_CENTER, ROTATE_DURATION_MS);
+      await animer("slimeyId", ROTATE_CENTER, ROTATE_DURATION_MS);
+      await animer("slimeyId", ROTATE_HOR, ROTATE_DURATION_MS);
+    }
   };
 
   const infiniteTripleSpinBonus = async () => {
     // TODO: infiniteTripleSpinBonus
     // TODO: Optionnel: Un petit défi, vous pourriez faire une seule animation qui combine les 3 rotations et utilisé l'option de boucle
+    await animer("slimeyId", ROTATE_TRIPLE, ROTATE_DURATION_MS * 3, false, Infinity);
   };
 
   // -------------------------------------------------------------------------
